@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ExternalLink, Github, ArrowUpRight } from "lucide-react";
+import { ExternalLink, ArrowUpRight } from "lucide-react";
+import { GithubIcon } from "@/components/ui/BrandIcons";
 
 interface Project {
   id: string;
@@ -180,7 +181,7 @@ export default function PortfolioSection({ projects = DEFAULT_PROJECTS }: Portfo
                         className="w-9 h-9 rounded-xl glass flex items-center justify-center text-white hover:bg-white/20 transition-colors"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <Github size={16} />
+                        <GithubIcon size={16} />
                       </a>
                     )}
                     {project.liveUrl && (

@@ -1,17 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
 import {
-  LayoutDashboard,
   Briefcase,
   FileText,
   MessageSquare,
   Users,
-  TrendingUp,
-  ArrowUpRight,
-  Eye,
   Star,
   Globe,
   Clock,

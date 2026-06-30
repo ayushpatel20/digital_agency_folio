@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "**" },
     ],
+    qualities: [75, 90],
   },
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
