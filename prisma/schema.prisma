@@ -1,0 +1,306 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite doesn't support enums; using String with runtime validation
+// Role values: ADMIN | EDITOR | VIEWER
+// Status values: DRAFT | PUBLISHED
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  role          String    @default("VIEWER")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  auditLogs     AuditLog[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model SiteSettings {
+  id              String  @id @default(cuid())
+  siteName        String  @default("Startup of the Future")
+  logoUrl         String?
+  faviconUrl      String?
+  primaryColor    String  @default("#6366f1")
+  secondaryColor  String  @default("#8b5cf6")
+  accentColor     String  @default("#06b6d4")
+  fontHeading     String  @default("Space Grotesk")
+  fontBody        String  @default("Inter")
+  animationSpeed  String  @default("normal")
+  cursorEffect    Boolean @default(true)
+  scrollIndicator Boolean @default(true)
+  loaderEnabled   Boolean @default(true)
+  metaTitle       String  @default("Startup of the Future | Innovation Redefined")
+  metaDescription String  @default("We are a next-generation digital startup delivering cutting-edge AI, Web, and Mobile solutions.")
+  ogImage         String?
+  keywords        String  @default("startup, digital agency, AI, web development, mobile apps")
+  googleAnalytics String?
+  updatedAt       DateTime @updatedAt
+}
+
+model HeroSection {
+  id              String  @id @default(cuid())
+  heading         String  @default("We Build the\nFuture of Digital")
+  subHeading      String  @default("A next-generation startup delivering AI-powered products, stunning web experiences, and scalable mobile solutions.")
+  ctaPrimaryText  String  @default("Explore Our Work")
+  ctaPrimaryLink  String  @default("#portfolio")
+  ctaSecondaryText String @default("Let's Talk")
+  ctaSecondaryLink String @default("#contact")
+  backgroundImage String?
+  stat1Value      String  @default("150+")
+  stat1Label      String  @default("Projects Delivered")
+  stat2Value      String  @default("98%")
+  stat2Label      String  @default("Client Satisfaction")
+  stat3Value      String  @default("$50M+")
+  stat3Label      String  @default("Revenue Generated")
+  badge1Text      String  @default("AI-Powered")
+  badge2Text      String  @default("Award Winning")
+  badge3Text      String  @default("Top Rated")
+  active          Boolean @default(true)
+  updatedAt       DateTime @updatedAt
+}
+
+model AboutSection {
+  id          String  @id @default(cuid())
+  heading     String  @default("We Provide Brilliant Ideas to Grow Your Startup")
+  subHeading  String  @default("Who We Are")
+  description String  @default("We are a team of passionate innovators, designers, and engineers dedicated to building products that make a difference. With a proven track record across 150+ projects, we transform ideas into impactful digital realities.")
+  profileImage String?
+  resumeUrl   String?
+  stat1Value  String  @default("150+")
+  stat1Label  String  @default("Projects Done")
+  stat2Value  String  @default("98%")
+  stat2Label  String  @default("Success Rate")
+  stat3Value  String  @default("$50M+")
+  stat3Label  String  @default("Revenue Generated")
+  stat4Value  String  @default("10+")
+  stat4Label  String  @default("Years Experience")
+  fundingAmount String @default("$15M+")
+  fundingDesc String @default("We helped clients secure over $15M in funding through our growth strategies and product development.")
+  active      Boolean @default(true)
+  updatedAt   DateTime @updatedAt
+}
+
+model Service {
+  id          String  @id @default(cuid())
+  title       String
+  slug        String  @unique
+  description String
+  icon        String  @default("Zap")
+  imageUrl    String?
+  features    String  @default("[]")
+  order       Int     @default(0)
+  active      Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Project {
+  id           String  @id @default(cuid())
+  title        String
+  slug         String  @unique
+  description  String
+  category     String  @default("Web Development")
+  technologies String  @default("[]")
+  images       String  @default("[]")
+  videoUrl     String?
+  githubUrl    String?
+  liveUrl      String?
+  featured     Boolean @default(false)
+  order        Int     @default(0)
+  status       String  @default("PUBLISHED")
+  seoTitle     String?
+  seoDesc      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model BlogPost {
+  id           String      @id @default(cuid())
+  title        String
+  slug         String      @unique
+  excerpt      String
+  content      String
+  featuredImage String?
+  category     String      @default("Technology")
+  tags         String      @default("[]")
+  status       String      @default("DRAFT")
+  seoTitle     String?
+  seoDesc      String?
+  author       String      @default("Admin")
+  publishedAt  DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Testimonial {
+  id          String  @id @default(cuid())
+  name        String
+  company     String
+  designation String
+  rating      Int     @default(5)
+  text        String
+  imageUrl    String?
+  visible     Boolean @default(true)
+  order       Int     @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TeamMember {
+  id          String  @id @default(cuid())
+  name        String
+  role        String
+  bio         String?
+  imageUrl    String?
+  socialLinks String  @default("{}")
+  order       Int     @default(0)
+  active      Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PricingPlan {
+  id        String  @id @default(cuid())
+  name      String
+  price     String
+  period    String  @default("month")
+  features  String  @default("[]")
+  popular   Boolean @default(false)
+  ctaText   String  @default("Get Started")
+  ctaLink   String  @default("#contact")
+  order     Int     @default(0)
+  active    Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Faq {
+  id        String  @id @default(cuid())
+  question  String
+  answer    String
+  order     Int     @default(0)
+  active    Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ContactInfo {
+  id          String  @id @default(cuid())
+  email       String  @default("hello@startupofthefuture.com")
+  phone       String  @default("+1 (555) 000-0000")
+  address     String  @default("123 Innovation Drive, San Francisco, CA 94102")
+  mapUrl      String?
+  twitterUrl  String?
+  facebookUrl String?
+  instagramUrl String?
+  linkedinUrl String?
+  githubUrl   String?
+  youtubeUrl  String?
+  updatedAt   DateTime @updatedAt
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model NavLink {
+  id       String @id @default(cuid())
+  label    String
+  href     String
+  order    Int    @default(0)
+  active   Boolean @default(true)
+  children String @default("[]")
+}
+
+model FooterSettings {
+  id         String @id @default(cuid())
+  copyright  String @default("© 2025 Startup of the Future. All Rights Reserved.")
+  quickLinks String @default("[]")
+  updatedAt  DateTime @updatedAt
+}
+
+model MediaFile {
+  id        String   @id @default(cuid())
+  name      String
+  url       String
+  type      String
+  size      Int      @default(0)
+  folder    String   @default("general")
+  createdAt DateTime @default(now())
+}
+
+model SeoSettings {
+  id          String  @id @default(cuid())
+  metaTitle   String  @default("Startup of the Future | Innovation Redefined")
+  metaDesc    String  @default("We are a next-generation digital startup delivering cutting-edge AI, Web, and Mobile solutions.")
+  ogImage     String?
+  keywords    String  @default("startup, digital agency, AI, web development")
+  canonical   String?
+  robots      String  @default("index, follow")
+  schema      String?
+  updatedAt   DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  resource  String
+  details   String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
