@@ -78,6 +78,7 @@ export default function Header() {
                   fill
                   className="object-contain"
                   priority
+                  sizes="40px"
                 />
               </div>
               <span

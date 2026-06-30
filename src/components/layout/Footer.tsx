@@ -86,6 +86,7 @@ export default function Footer() {
                   alt="Startup of the Future"
                   fill
                   className="object-contain"
+                  sizes="40px"
                 />
               </div>
               <span className="font-space-grotesk font-bold text-xl text-white">

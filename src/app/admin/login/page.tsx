@@ -63,6 +63,7 @@ export default function AdminLoginPage() {
                 alt="Logo"
                 fill
                 className="object-contain"
+                sizes="56px"
               />
             </div>
             <h1 className="text-white font-bold text-2xl font-space-grotesk text-center">

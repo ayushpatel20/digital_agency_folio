@@ -87,7 +87,7 @@ export default function AdminShell({ children, title = "Dashboard" }: AdminShell
       {/* Logo */}
       <div className="flex items-center gap-3 p-6 border-b border-white/5">
         <div className="relative w-8 h-8">
-          <Image src="/images/logo.png" alt="Logo" fill className="object-contain" />
+          <Image src="/images/logo.png" alt="Logo" fill className="object-contain" sizes="32px" />
         </div>
         <div>
           <p className="text-white font-bold text-sm font-space-grotesk">Admin Panel</p>
