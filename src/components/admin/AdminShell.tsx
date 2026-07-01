@@ -81,26 +81,26 @@ interface SidebarProps {
 
 const Sidebar = memo(function Sidebar({ pathname, setSidebarOpen, handleSignOut }: SidebarProps) {
   return (
-    <aside className="flex flex-col h-full">
+    <aside className="flex flex-col h-full bg-[#03060b]">
       {/* Logo */}
-      <div className="flex items-center gap-3 p-6 border-b border-white/5">
+      <div className="flex items-center gap-3 px-6 py-5 border-b border-white/5">
         <div className="relative w-8 h-8">
           <Image src="/images/logo.png" alt="Logo" fill className="object-contain" sizes="32px" />
         </div>
         <div>
-          <p className="text-white font-bold text-sm font-space-grotesk">Admin Panel</p>
-          <p className="text-white/30 text-xs">Startup of the Future</p>
+          <p className="text-white font-bold text-sm font-space-grotesk tracking-tight">Admin Panel</p>
+          <p className="text-white/30 text-[10px] uppercase tracking-wider font-semibold">Startup of the Future</p>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+      <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-6">
         {NAV_GROUPS.map((group) => (
           <div key={group.label}>
-            <p className="text-white/25 text-[10px] font-semibold uppercase tracking-[0.15em] px-3 mb-2">
+            <p className="text-white/20 text-[9px] font-bold uppercase tracking-[0.2em] px-3 mb-2.5">
               {group.label}
             </p>
-            <ul className="space-y-0.5">
+            <ul className="space-y-1">
               {group.items.map((item) => {
                 const isActive = pathname === item.href;
                 return (
@@ -108,16 +108,16 @@ const Sidebar = memo(function Sidebar({ pathname, setSidebarOpen, handleSignOut 
                     <Link
                       href={item.href}
                       onClick={() => setSidebarOpen(false)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 ${
+                      className={`flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                         isActive
-                          ? "bg-primary/15 text-primary border border-primary/20"
-                          : "text-white/50 hover:text-white hover:bg-white/4"
+                          ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(99,102,241,0.06)] font-semibold"
+                          : "text-white/45 hover:text-white/80 hover:bg-white/3"
                       }`}
                     >
-                      <item.icon size={15} />
+                      <item.icon size={15} className={`flex-shrink-0 ${isActive ? "text-primary" : "text-white/40"}`} />
                       <span>{item.label}</span>
                       {isActive && (
-                        <ChevronRight size={12} className="ml-auto opacity-60" />
+                        <ChevronRight size={12} className="ml-auto opacity-60 text-primary" />
                       )}
                     </Link>
                   </li>
@@ -129,18 +129,18 @@ const Sidebar = memo(function Sidebar({ pathname, setSidebarOpen, handleSignOut 
       </nav>
 
       {/* Bottom */}
-      <div className="p-4 border-t border-white/5 space-y-2">
+      <div className="p-4 border-t border-white/5 space-y-1.5">
         <Link
           href="/"
           target="_blank"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/40 hover:text-white hover:bg-white/4 transition-all"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:text-white hover:bg-white/3 transition-all"
         >
           <Globe size={15} />
           <span>View Website</span>
         </Link>
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/40 hover:text-red-400 hover:bg-red-500/5 transition-all"
+          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:text-red-400 hover:bg-red-500/5 transition-all"
         >
           <LogOut size={15} />
           <span>Sign Out</span>
@@ -202,7 +202,7 @@ export default function AdminShell({ children, title = "Dashboard" }: AdminShell
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
-        <div className="flex items-center justify-between px-6 py-4 glass border-b border-white/5">
+        <div className="flex items-center justify-between px-6 lg:px-8 py-5 glass border-b border-white/5 z-20">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -213,14 +213,14 @@ export default function AdminShell({ children, title = "Dashboard" }: AdminShell
             <h1 className="text-white font-bold text-lg font-space-grotesk">{title}</h1>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold shadow-[0_0_15px_rgba(99,102,241,0.2)]">
               A
             </div>
           </div>
         </div>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8 bg-[#020408] relative z-10">
           {children}
         </main>
       </div>

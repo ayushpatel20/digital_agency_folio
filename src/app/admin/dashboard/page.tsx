@@ -23,29 +23,29 @@ interface StatCardProps {
 
 function StatCard({ title, value, change, positive = true, icon: Icon, color }: StatCardProps) {
   return (
-    <div className="glass-card p-6 group hover:-translate-y-1">
-      <div className="flex items-start justify-between mb-4">
-        <div
-          className={`w-11 h-11 rounded-2xl flex items-center justify-center ${color}`}
-        >
-          <Icon size={20} />
+    <div className="glass-card p-6 flex flex-col justify-between h-full group">
+      <div>
+        <div className="flex items-start justify-between mb-5">
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color} shadow-sm`}>
+            <Icon size={22} className="flex-shrink-0" />
+          </div>
+          {change && (
+            <span
+              className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-all duration-300 ${
+                positive
+                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/10"
+                  : "bg-red-500/10 text-red-400 border-red-500/10"
+              }`}
+            >
+              {positive ? "↑" : "↓"} {change}
+            </span>
+          )}
         </div>
-        {change && (
-          <span
-            className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-              positive
-                ? "bg-emerald-500/10 text-emerald-400"
-                : "bg-red-500/10 text-red-400"
-            }`}
-          >
-            {positive ? "↑" : "↓"} {change}
-          </span>
-        )}
+        <p className="text-3xl lg:text-4xl font-bold text-white font-space-grotesk tracking-tight mb-2 leading-none">
+          {value}
+        </p>
       </div>
-      <p className="text-3xl font-bold text-white font-space-grotesk tracking-tight mb-1">
-        {value}
-      </p>
-      <p className="text-white/40 text-sm">{title}</p>
+      <p className="text-white/40 text-sm font-medium">{title}</p>
     </div>
   );
 }
@@ -66,22 +66,22 @@ export default function AdminDashboard() {
 
   return (
     <AdminShell title="Dashboard">
-      {/* Welcome */}
-      <div className="glass-card p-8 mb-6 relative overflow-hidden">
+      {/* Welcome Banner */}
+      <div className="relative overflow-hidden rounded-3xl glass-strong p-8 mb-8 border border-white/10">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10">
-          <p className="text-white/40 text-sm mb-1">Good morning 👋</p>
-          <h2 className="text-2xl font-bold text-white font-space-grotesk mb-2">
+          <p className="text-white/40 text-sm mb-1.5">Good morning 👋</p>
+          <h2 className="text-3xl font-bold text-white font-space-grotesk mb-2.5 tracking-tight">
             Welcome back, Admin
           </h2>
-          <p className="text-white/50 text-sm">
+          <p className="text-white/50 text-sm leading-relaxed max-w-xl">
             Here's what's happening with your website today.
           </p>
-          <div className="flex items-center gap-3 mt-5">
+          <div className="flex items-center gap-3 mt-6">
             <a
               href="/"
               target="_blank"
-              className="btn-primary text-sm px-5 py-2.5"
+              className="btn-primary text-sm px-6 py-3 rounded-xl"
             >
               <span>View Live Site</span>
               <Globe size={14} />
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         <StatCard
           title="Total Projects"
           value="4"
@@ -123,19 +123,21 @@ export default function AdminDashboard() {
       </div>
 
       {/* Quick Actions + Recent */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Quick Actions */}
         <div className="glass-card p-6">
-          <h3 className="text-white font-semibold mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-2 gap-3">
+          <h3 className="text-white font-semibold text-lg mb-5 font-space-grotesk tracking-tight">Quick Actions</h3>
+          <div className="grid grid-cols-2 gap-4">
             {QUICK_ACTIONS.map((action) => (
               <a
                 key={action.label}
                 href={action.href}
-                className="flex flex-col gap-3 p-4 rounded-2xl glass border border-white/6 hover:border-white/12 hover:bg-white/3 transition-all group"
+                className="flex flex-col gap-4 p-5 rounded-2xl glass border border-white/5 hover:border-primary/20 hover:bg-primary/5 shadow-sm transition-all duration-300 group"
               >
-                <action.icon size={18} className={action.color} />
-                <span className="text-white/70 text-sm font-medium group-hover:text-white transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-white/3 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                  <action.icon size={18} className={`${action.color} group-hover:scale-110 transition-transform`} />
+                </div>
+                <span className="text-white/70 text-sm font-semibold group-hover:text-white transition-colors">
                   {action.label}
                 </span>
               </a>
@@ -145,8 +147,8 @@ export default function AdminDashboard() {
 
         {/* Site Status */}
         <div className="glass-card p-6">
-          <h3 className="text-white font-semibold mb-4">Site Status</h3>
-          <div className="space-y-3">
+          <h3 className="text-white font-semibold text-lg mb-5 font-space-grotesk tracking-tight">Site Status</h3>
+          <div className="space-y-1">
             {[
               { label: "Homepage", status: "Live", ok: true },
               { label: "Admin Panel", status: "Active", ok: true },
@@ -155,11 +157,11 @@ export default function AdminDashboard() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="flex items-center justify-between py-2.5 border-b border-white/4 last:border-0"
+                className="flex items-center justify-between py-3.5 border-b border-white/5 last:border-0"
               >
-                <span className="text-white/60 text-sm">{item.label}</span>
+                <span className="text-white/60 text-sm font-medium">{item.label}</span>
                 <span
-                  className={`flex items-center gap-1.5 text-xs font-medium ${
+                  className={`flex items-center gap-1.5 text-xs font-semibold ${
                     item.ok ? "text-emerald-400" : "text-red-400"
                   }`}
                 >
@@ -170,12 +172,12 @@ export default function AdminDashboard() {
             ))}
           </div>
 
-          <div className="mt-6 p-4 rounded-2xl bg-primary/5 border border-primary/10">
+          <div className="mt-6 p-4 rounded-xl bg-primary/5 border border-primary/10">
             <div className="flex items-center gap-2 mb-1">
               <Clock size={13} className="text-primary" />
-              <span className="text-white/60 text-xs font-medium">Last Updated</span>
+              <span className="text-white/60 text-xs font-semibold">Last Updated</span>
             </div>
-            <p className="text-white/40 text-xs">
+            <p className="text-white/40 text-xs font-medium">
               {mounted
                 ? new Date().toLocaleString("en-US", {
                     dateStyle: "medium",
