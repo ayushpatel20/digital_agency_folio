@@ -1,0 +1,2093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uifolio Admin Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:100,200,300,400,500,600,700,800,900&amp;display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --sidebar-color: #1f2833;
+            --card-color: rgba(31, 40, 51, 0.45);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-color: #c5c6c7;
+            --text-title: #ffffff;
+            --accent-color: #45f3ff;
+            --accent-hover: #1f9cff;
+            --danger-color: #ff4d4d;
+            --success-color: #2ec4b6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* Loading Overlay */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--card-color);
+            border-top: 5px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Auth Screen */
+        #auth-screen {
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0b0c10 0%, #1f2833 100%);
+            padding: 20px;
+        }
+
+        .login-card {
+            background: rgba(31, 40, 51, 0.65);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            padding: 40px 30px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .login-card h2 {
+            color: var(--text-title);
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .login-card p {
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 30px;
+            opacity: 0.7;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--text-title);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(69, 243, 255, 0.15);
+        }
+
+        .btn {
+            background: var(--accent-color);
+            color: #000000;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 20px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(31, 156, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-title);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: none;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #cc0000;
+            box-shadow: 0 4px 15px rgba(255, 77, 77, 0.4);
+        }
+
+        .alert {
+            background: rgba(255, 77, 77, 0.15);
+            border: 1px solid var(--danger-color);
+            color: var(--text-title);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            display: none;
+        }
+
+        /* Dashboard Screen */
+        #dashboard-screen {
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-color);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar-brand {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-brand img {
+            width: 32px;
+            height: auto;
+        }
+
+        .sidebar-brand h3 {
+            color: var(--text-title);
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 10px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .sidebar-menu::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 6px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu li.active a {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--accent-color);
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Main Workspace Content */
+        .main-content {
+            margin-left: 260px;
+            flex-grow: 1;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .header-bar h1 {
+            color: var(--text-title);
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .card {
+            background: var(--card-color);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .card h3 {
+            color: var(--text-title);
+            margin-bottom: 25px;
+            font-size: 18px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Tabs Panels */
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* Grid inputs layout */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .span-2 {
+            grid-column: span 2;
+        }
+
+        /* Media Library Grid */
+        .media-browser-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .media-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .media-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .media-card:hover {
+            border-color: var(--accent-color);
+            transform: scale(1.03);
+        }
+
+        .media-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .media-card .svg-preview {
+            font-size: 40px;
+            color: var(--text-color);
+        }
+
+        .media-card .media-actions {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .media-card:hover .media-actions {
+            opacity: 1;
+        }
+
+        .media-action-btn {
+            background: white;
+            color: black;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .media-action-btn:hover {
+            transform: scale(1.15);
+        }
+
+        .media-action-btn.delete-btn {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        /* Image selector picker inputs */
+        .image-picker-field {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Dropzone area */
+        .dropzone {
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dropzone:hover {
+            border-color: var(--accent-color);
+            background: rgba(69, 243, 255, 0.03);
+        }
+
+        .dropzone i {
+            font-size: 40px;
+            color: var(--accent-color);
+            margin-bottom: 12px;
+        }
+
+        /* Custom Bullet List Component */
+        .bullet-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: #1f2833;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            color: var(--text-title);
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .close-btn {
+            color: var(--text-color);
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: var(--danger-color);
+        }
+
+        /* CRUD Item Row Lists */
+        .crud-list-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 20px;
+        }
+
+        .crud-list-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .crud-item-details {
+            flex-grow: 1;
+        }
+
+        .crud-item-details h4 {
+            color: var(--text-title);
+            margin-bottom: 4px;
+        }
+
+        .crud-item-details p {
+            font-size: 13px;
+            opacity: 0.7;
+        }
+
+        .crud-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .toast-notify {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--success-color);
+            color: white;
+            padding: 14px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            z-index: 9999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast-notify.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Dynamic Loader Overlay -->
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- 1. Authentication Login Screen -->
+    <div id="auth-screen">
+        <div class="login-card">
+            <h2>Uifolio Admin</h2>
+            <p>Access Content Management System</p>
+            <div id="login-error" class="alert"></div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" required placeholder="admin@uifolio.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login to Dashboard
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Dashboard Screen Container -->
+    <div id="dashboard-screen">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <i class="fa-solid fa-palette" style="color: var(--accent-color); font-size: 20px;"></i>
+                <h3>Uifolio CMS</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active"><a href="#settings" onclick="switchTab('settings')"><i class="fa-solid fa-sliders"></i> Site Settings</a></li>
+                <li><a href="#seo" onclick="switchTab('seo')"><i class="fa-solid fa-search"></i> SEO / Metadata</a></li>
+                <li><a href="#hero" onclick="switchTab('hero')"><i class="fa-solid fa-home"></i> Hero Section</a></li>
+                <li><a href="#about" onclick="switchTab('about')"><i class="fa-solid fa-circle-info"></i> About Section</a></li>
+                <li><a href="#services" onclick="switchTab('services')"><i class="fa-solid fa-cubes"></i> Services</a></li>
+                <li><a href="#portfolio" onclick="switchTab('portfolio')"><i class="fa-solid fa-briefcase"></i> Portfolio / Gallery</a></li>
+                <li><a href="#team" onclick="switchTab('team')"><i class="fa-solid fa-users"></i> Team Members</a></li>
+                <li><a href="#testimonials" onclick="switchTab('testimonials')"><i class="fa-solid fa-comments"></i> Testimonials</a></li>
+                <li><a href="#clients" onclick="switchTab('clients')"><i class="fa-solid fa-handshake"></i> Client Partners</a></li>
+                <li><a href="#contact" onclick="switchTab('contact')"><i class="fa-solid fa-envelope"></i> Contacts</a></li>
+                <li><a href="#media" onclick="switchTab('media')"><i class="fa-solid fa-photo-film"></i> Media Library</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <button class="btn btn-secondary" onclick="logout()" style="padding: 10px;"><i class="fa-solid fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="header-bar">
+                <h1 id="page-title">Site Settings</h1>
+                <div class="actions">
+                    <a href="/" target="_blank" class="btn btn-secondary" style="padding: 10px 16px;"><i class="fa-solid fa-external-link"></i> Live Website</a>
+                </div>
+            </div>
+
+            <!-- Tab: Settings -->
+            <section id="settings" class="tab-panel active">
+                <form onsubmit="saveSettings(event)">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-circle-nodes"></i> Logo Management</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Navbar & Global Logo (Light)</label>
+                                <div class="image-picker-field">
+                                    <input type="text" id="setting-logo_light" placeholder="assets/imgs/LOGO.png">
+                                    <button type="button" class="btn btn-secondary" onclick="openMediaSelector('setting-logo_light')"><i class="fa-solid fa-folder-open"></i></button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Favicon Icon (.ico, .png)</label>
+                                <div class="image-picker-field">
+                                    <input type="text" id="setting-favicon" placeholder="assets/imgs/LOGO.png">
+                                    <button type="button" class="btn btn-secondary" onclick="openMediaSelector('setting-favicon')"><i class="fa-solid fa-folder-open"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fa-solid fa-gear"></i> Website Configuration</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Site Name</label>
+                                <input type="text" id="setting-site_name" placeholder="Uifolio">
+                            </div>
+                            <div class="form-group">
+                                <label>Footer Copyright Text</label>
+                                <input type="text" id="setting-footer_copyright" placeholder="© 2025 Uifolio Agency. All Right Reserved">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" style="width: auto;"><i class="fa-solid fa-save"></i> Save Site Settings</button>
+                </form>
+            </section>
+
+            <!-- Tab: SEO -->
+            <section id="seo" class="tab-panel">
+                <form onsubmit="saveSettings(event)">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-earth-americas"></i> Search Engine Optimization</h3>
+                        <div class="form-group">
+                            <label>Browser Page Title</label>
+                            <input type="text" id="setting-site_title" placeholder="Uifolio">
+                        </div>
+                        <div class="form-group">
+                            <label>Meta Keywords (Comma separated)</label>
+                            <input type="text" id="setting-seo_keywords" placeholder="HTML5 Template, Portfolio">
+                        </div>
+                        <div class="form-group">
+                            <label>Meta Description</label>
+                            <textarea id="setting-seo_description" rows="4" placeholder="Brief description of the agency website..."></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn" style="width: auto;"><i class="fa-solid fa-save"></i> Save SEO Settings</button>
+                </form>
+            </section>
+
+            <!-- Tab: Hero Section -->
+            <section id="hero" class="tab-panel">
+                <form onsubmit="saveSettings(event)">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-header"></i> Hero Header Banner</h3>
+                        <div class="form-group">
+                            <label>Hero Super-Heading Title (HTML allowed for layout)</label>
+                            <textarea id="setting-hero_title" rows="2" placeholder="We are a creative <br> digital agency."></textarea>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Hero Subtitle Side-Tag</label>
+                                <input type="text" id="setting-hero_subtitle" placeholder="Uifolio">
+                            </div>
+                            <div class="form-group">
+                                <label>Hero Description</label>
+                                <textarea id="setting-hero_description" rows="2" placeholder="Leading digital product agency..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn" style="width: auto;"><i class="fa-solid fa-save"></i> Save Hero Section</button>
+                </form>
+            </section>
+
+            <!-- Tab: About Section -->
+            <section id="about" class="tab-panel">
+                <form onsubmit="saveSettings(event)">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-info-circle"></i> Info Stats Headings</h3>
+                        <div class="form-group">
+                            <label>Intro Sub-heading Tag</label>
+                            <input type="text" id="setting-about_subheading" placeholder="How We Are?">
+                        </div>
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label>Heading Start Accent (Play)</label>
+                                <input type="text" id="setting-about_heading_play" placeholder="We provide brilliant idea">
+                            </div>
+                            <div class="form-group">
+                                <label>Heading Middle (Main Body)</label>
+                                <input type="text" id="setting-about_heading_main" placeholder="to grow the startup & agency with your">
+                            </div>
+                            <div class="form-group">
+                                <label>Heading Ending Highlight</label>
+                                <input type="text" id="setting-about_heading_accent" placeholder="sharp brand.">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Intro Block Description Paragraph</label>
+                            <textarea id="setting-about_stat_desc" rows="3" placeholder="Consumers today rely heavily..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fa-solid fa-chart-bar"></i> Dynamic Stats Grid</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Stat 1 Value (Funding)</label>
+                                <input type="text" id="setting-about_stat_1_val" placeholder="15 M">
+                            </div>
+                            <div class="form-group">
+                                <label>Stat 1 Subtext label</label>
+                                <input type="text" id="setting-about_stat_1_lbl" placeholder="We helped to get funding">
+                            </div>
+                            <div class="form-group">
+                                <label>Stat 2 Value (Projects)</label>
+                                <input type="text" id="setting-about_stat_2_val" placeholder="86+">
+                            </div>
+                            <div class="form-group">
+                                <label>Stat 2 Subtext label</label>
+                                <input type="text" id="setting-about_stat_2_lbl" placeholder="Projects Done">
+                            </div>
+                            <div class="form-group">
+                                <label>Stat 3 Value (Rating)</label>
+                                <input type="text" id="setting-about_stat_3_val" placeholder="98%">
+                            </div>
+                            <div class="form-group">
+                                <label>Stat 3 Subtext label</label>
+                                <input type="text" id="setting-about_stat_3_lbl" placeholder="Successful Rating">
+                            </div>
+                            <div class="form-group">
+                                <label>Stat 4 Value (Growth)</label>
+                                <input type="text" id="setting-about_stat_4_val" placeholder="223m">
+                            </div>
+                            <div class="form-group">
+                                <label>Stat 4 Subtext label</label>
+                                <input type="text" id="setting-about_stat_4_lbl" placeholder="Growth Net Worth">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fa-solid fa-quote-left"></i> Lower Overlay Quote Block</h3>
+                        <div class="form-grid">
+                            <div class="form-group span-2">
+                                <label>Intro Quote Text</label>
+                                <textarea id="setting-intro_quote" rows="2" placeholder="Whether it's crafting a visually stunning..."></textarea>
+                            </div>
+                            <div class="form-group span-2">
+                                <label>Quote Background Image</label>
+                                <div class="image-picker-field">
+                                    <input type="text" id="setting-intro_quote_bg" placeholder="assets/imgs/intro/14.png">
+                                    <button type="button" class="btn btn-secondary" onclick="openMediaSelector('setting-intro_quote_bg')"><i class="fa-solid fa-folder-open"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn" style="width: auto;"><i class="fa-solid fa-save"></i> Save About Info</button>
+                </form>
+            </section>
+
+            <!-- Tab: Services -->
+            <section id="services" class="tab-panel">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="border: none; margin: 0; padding: 0;"><i class="fa-solid fa-list"></i> Managed Services</h3>
+                        <button class="btn" style="width: auto; padding: 8px 16px; font-size: 13px;" onclick="openServiceModal()"><i class="fa-solid fa-plus"></i> Add Service</button>
+                    </div>
+                    <div id="services-list">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: Portfolio -->
+            <section id="portfolio" class="tab-panel">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="border: none; margin: 0; padding: 0;"><i class="fa-solid fa-briefcase"></i> Portfolio / Works Grid</h3>
+                        <button class="btn" style="width: auto; padding: 8px 16px; font-size: 13px;" onclick="openPortfolioModal()"><i class="fa-solid fa-plus"></i> Add Portfolio Item</button>
+                    </div>
+                    <div id="portfolio-list">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: Team Members -->
+            <section id="team" class="tab-panel">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="border: none; margin: 0; padding: 0;"><i class="fa-solid fa-users"></i> Agency Team</h3>
+                        <button class="btn" style="width: auto; padding: 8px 16px; font-size: 13px;" onclick="openTeamModal()"><i class="fa-solid fa-plus"></i> Add Team Member</button>
+                    </div>
+                    <div id="team-list">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: Testimonials -->
+            <section id="testimonials" class="tab-panel">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="border: none; margin: 0; padding: 0;"><i class="fa-solid fa-comments"></i> Customer Reviews</h3>
+                        <button class="btn" style="width: auto; padding: 8px 16px; font-size: 13px;" onclick="openTestimonialModal()"><i class="fa-solid fa-plus"></i> Add Testimonial</button>
+                    </div>
+                    <div id="testimonials-list">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: Clients -->
+            <section id="clients" class="tab-panel">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="border: none; margin: 0; padding: 0;"><i class="fa-solid fa-handshake"></i> Partner Brand Logos</h3>
+                        <button class="btn" style="width: auto; padding: 8px 16px; font-size: 13px;" onclick="openClientModal()"><i class="fa-solid fa-plus"></i> Add Partner Logo</button>
+                    </div>
+                    <div id="clients-list">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: Contact -->
+            <section id="contact" class="tab-panel">
+                <form onsubmit="saveSettings(event)">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-location-dot"></i> Boston Branch Office</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Location Label Tag</label>
+                                <input type="text" id="setting-contact_heading_1" placeholder="Boston, MA">
+                            </div>
+                            <div class="form-group">
+                                <label>Branch Address</label>
+                                <input type="text" id="setting-contact_address_1" placeholder="49 Brimmer St, Boston, MA 02108">
+                            </div>
+                            <div class="form-group">
+                                <label>Branch Email</label>
+                                <input type="email" id="setting-contact_email_1" placeholder="hello@archin.co">
+                            </div>
+                            <div class="form-group">
+                                <label>Branch Phone</label>
+                                <input type="text" id="setting-contact_phone_1" placeholder="(054) 3256 78 87">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fa-solid fa-location-dot"></i> Portland Branch Office</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Location Label Tag</label>
+                                <input type="text" id="setting-contact_heading_2" placeholder="Portland, OR">
+                            </div>
+                            <div class="form-group">
+                                <label>Branch Address</label>
+                                <input type="text" id="setting-contact_address_2" placeholder="2221 Sw Broadway Dr, Portland, OR 97201">
+                            </div>
+                            <div class="form-group">
+                                <label>Branch Email</label>
+                                <input type="email" id="setting-contact_email_2" placeholder="portland@archin.co">
+                            </div>
+                            <div class="form-group">
+                                <label>Branch Phone</label>
+                                <input type="text" id="setting-contact_phone_2" placeholder="(021) 4246 63 68">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fa-solid fa-share-nodes"></i> Global Social Media Links</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Twitter / X Link</label>
+                                <input type="text" id="setting-social_twitter" placeholder="#0">
+                            </div>
+                            <div class="form-group">
+                                <label>Facebook Link</label>
+                                <input type="text" id="setting-social_facebook" placeholder="#0">
+                            </div>
+                            <div class="form-group">
+                                <label>Instagram Link</label>
+                                <input type="text" id="setting-social_instagram" placeholder="#0">
+                            </div>
+                            <div class="form-group">
+                                <label>LinkedIn Link</label>
+                                <input type="text" id="setting-social_linkedin" placeholder="#0">
+                            </div>
+                            <div class="form-group">
+                                <label>YouTube Link</label>
+                                <input type="text" id="setting-social_youtube" placeholder="#0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" style="width: auto;"><i class="fa-solid fa-save"></i> Save Contacts</button>
+                </form>
+            </section>
+
+            <!-- Tab: Media Library -->
+            <section id="media" class="tab-panel">
+                <div class="card">
+                    <h3><i class="fa-solid fa-upload"></i> Upload Media Files</h3>
+                    <div class="dropzone" id="media-dropzone">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <h4>Drag and drop images here, or click to upload</h4>
+                        <p style="font-size: 12px; opacity: 0.6; margin-top: 8px;">Allowed formats: WebP, SVG, PNG, JPG, JPEG, ICO (Max 5MB)</p>
+                        <input type="file" id="media-file-input" style="display: none;" accept="image/*,.svg,.ico">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="media-browser-container">
+                        <div class="media-toolbar">
+                            <h3 style="border: none; margin: 0; padding: 0;"><i class="fa-solid fa-folder"></i> Gallery Assets</h3>
+                            <div style="position: relative;">
+                                <input type="text" id="media-search" placeholder="Search files..." oninput="filterMedia()" style="padding-left: 36px; padding-top: 8px; padding-bottom: 8px;">
+                                <i class="fa-solid fa-search" style="position: absolute; left: 12px; top: 12px; opacity: 0.5;"></i>
+                            </div>
+                        </div>
+                        <div class="media-grid" id="media-grid-view">
+                            <!-- Loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL: Media Selector Popup -->
+    <div id="media-selector-modal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>Select Image Asset</h3>
+                <button class="close-btn" onclick="closeModal('media-selector-modal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 16px; position: relative;">
+                    <input type="text" id="modal-media-search" placeholder="Search images..." oninput="filterModalMedia()" style="padding-left: 36px; width: 100%;">
+                    <i class="fa-solid fa-search" style="position: absolute; left: 12px; top: 15px; opacity: 0.5;"></i>
+                </div>
+                <div class="media-grid" id="modal-media-grid">
+                    <!-- Dynamic -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('media-selector-modal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Service Edit Form -->
+    <div id="service-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="service-modal-title">Add Service</h3>
+                <button class="close-btn" onclick="closeModal('service-modal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="saveService(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="service-id">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Service Title</label>
+                            <input type="text" id="service-title" required placeholder="Branding">
+                        </div>
+                        <div class="form-group">
+                            <label>Display Order (Index)</label>
+                            <input type="number" id="service-order" defaultValue="0">
+                        </div>
+                        <div class="form-group span-2">
+                            <label>Description Paragraph</label>
+                            <textarea id="service-description" required rows="3"></textarea>
+                        </div>
+                        <div class="form-group span-2">
+                            <label>Service Showcase Image</label>
+                            <div class="image-picker-field">
+                                <input type="text" id="service-image" required placeholder="assets/imgs/serv/1.jpg">
+                                <button type="button" class="btn btn-secondary" onclick="openMediaSelector('service-image')"><i class="fa-solid fa-folder-open"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-group span-2">
+                            <label>Bullets Checklist List Items</label>
+                            <div id="bullets-list-container">
+                                <!-- Dynamic bullet items -->
+                            </div>
+                            <button type="button" class="btn btn-secondary" style="width: auto; padding: 6px 12px; margin-top: 10px; font-size: 12px;" onclick="addBulletField('')"><i class="fa-solid fa-plus"></i> Add Bullet Item</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('service-modal')">Cancel</button>
+                    <button type="submit" class="btn" style="width: auto;">Save Service</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Portfolio Edit Form -->
+    <div id="portfolio-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="portfolio-modal-title">Add Portfolio Item</h3>
+                <button class="close-btn" onclick="closeModal('portfolio-modal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="savePortfolio(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="portfolio-id">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Work Title</label>
+                            <input type="text" id="portfolio-title" required placeholder="Unerio Residential">
+                        </div>
+                        <div class="form-group">
+                            <label>Category (e.g., Branding, Digital)</label>
+                            <input type="text" id="portfolio-category" required placeholder="Branding">
+                        </div>
+                        <div class="form-group">
+                            <label>Showcase Image Path</label>
+                            <div class="image-picker-field">
+                                <input type="text" id="portfolio-image" required placeholder="assets/imgs/works/1/1.webp">
+                                <button type="button" class="btn btn-secondary" onclick="openMediaSelector('portfolio-image')"><i class="fa-solid fa-folder-open"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Order Index</label>
+                            <input type="number" id="portfolio-order" defaultValue="0">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('portfolio-modal')">Cancel</button>
+                    <button type="submit" class="btn" style="width: auto;">Save Work</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Team Edit Form -->
+    <div id="team-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="team-modal-title">Add Team Member</h3>
+                <button class="close-btn" onclick="closeModal('team-modal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="saveTeam(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="team-id">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="team-name" required placeholder="Jurgen Klopp">
+                        </div>
+                        <div class="form-group">
+                            <label>Designation</label>
+                            <input type="text" id="team-designation" required placeholder="CEO Founder">
+                        </div>
+                        <div class="form-group">
+                            <label>Photo Image</label>
+                            <div class="image-picker-field">
+                                <input type="text" id="team-image" required placeholder="assets/imgs/team/1.png">
+                                <button type="button" class="btn btn-secondary" onclick="openMediaSelector('team-image')"><i class="fa-solid fa-folder-open"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Order Index</label>
+                            <input type="number" id="team-order" defaultValue="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Twitter link</label>
+                            <input type="text" id="team-social-twitter" placeholder="#0">
+                        </div>
+                        <div class="form-group">
+                            <label>Instagram link</label>
+                            <input type="text" id="team-social-instagram" placeholder="#0">
+                        </div>
+                        <div class="form-group">
+                            <label>Dribbble link</label>
+                            <input type="text" id="team-social-dribbble" placeholder="#0">
+                        </div>
+                        <div class="form-group">
+                            <label>Behance link</label>
+                            <input type="text" id="team-social-behance" placeholder="#0">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('team-modal')">Cancel</button>
+                    <button type="submit" class="btn" style="width: auto;">Save Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Testimonial Edit Form -->
+    <div id="testimonial-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="testimonial-modal-title">Add Testimonial</h3>
+                <button class="close-btn" onclick="closeModal('testimonial-modal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="saveTestimonial(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="testimonial-id">
+                    <div class="form-grid">
+                        <div class="form-group span-2">
+                            <label>Quote Content</label>
+                            <textarea id="testimonial-text" required rows="3" placeholder="Bradley's feedback..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Author Name</label>
+                            <input type="text" id="testimonial-author-name" required placeholder="Bradley Gordon">
+                        </div>
+                        <div class="form-group">
+                            <label>Author Role/Designation</label>
+                            <input type="text" id="testimonial-author-role" required placeholder="CEO & Founder, Archin Studio">
+                        </div>
+                        <div class="form-group">
+                            <label>Author Avatar Image</label>
+                            <div class="image-picker-field">
+                                <input type="text" id="testimonial-avatar" required placeholder="assets/imgs/testim/avatar1.jpg">
+                                <button type="button" class="btn btn-secondary" onclick="openMediaSelector('testimonial-avatar')"><i class="fa-solid fa-folder-open"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Order Index</label>
+                            <input type="number" id="testimonial-order" defaultValue="0">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('testimonial-modal')">Cancel</button>
+                    <button type="submit" class="btn" style="width: auto;">Save Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Client Edit Form -->
+    <div id="client-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="client-modal-title">Add Client Logo</h3>
+                <button class="close-btn" onclick="closeModal('client-modal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="saveClient(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="client-id">
+                    <div class="form-grid">
+                        <div class="form-group span-2">
+                            <label>Logo Asset path</label>
+                            <div class="image-picker-field">
+                                <input type="text" id="client-image" required placeholder="assets/imgs/clients/1.svg">
+                                <button type="button" class="btn btn-secondary" onclick="openMediaSelector('client-image')"><i class="fa-solid fa-folder-open"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Client Partner Name</label>
+                            <input type="text" id="client-name" placeholder="Client Name">
+                        </div>
+                        <div class="form-group">
+                            <label>Order Index</label>
+                            <input type="number" id="client-order" defaultValue="0">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('client-modal')">Cancel</button>
+                    <button type="submit" class="btn" style="width: auto;">Save Client</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="toast-notify">
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-text">Changes saved successfully!</span>
+    </div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        // Global States
+        let currentActiveSelectorTarget = null;
+        let cachedMediaList = [];
+
+        // App Initialisation
+        window.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            setupMediaDragDrop();
+        });
+
+        // ----------------------------------------------------
+        // Auth Logic
+        // ----------------------------------------------------
+        function checkAuth() {
+            fetch('/api/auth/session')
+                .then(res => res.json())
+                .then(data => {
+                    hideLoader();
+                    if (data.authenticated) {
+                        showDashboard();
+                    } else {
+                        showLogin();
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    hideLoader();
+                    showLogin();
+                });
+        }
+
+        // Login Handler
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            showLoader();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorDiv = document.getElementById('login-error');
+            errorDiv.style.display = 'none';
+
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(d => { throw new Error(d.error || 'Login failed') });
+                }
+                return res.json();
+            })
+            .then(data => {
+                showDashboard();
+                showToast('Welcome back, admin!');
+            })
+            .catch(err => {
+                hideLoader();
+                errorDiv.innerText = err.message;
+                errorDiv.style.display = 'block';
+            });
+        });
+
+        function logout() {
+            showLoader();
+            fetch('/api/auth/logout', { method: 'POST' })
+                .then(() => {
+                    showLogin();
+                    hideLoader();
+                    showToast('Logged out successfully.');
+                });
+        }
+
+        // Switch View Screens
+        function showLogin() {
+            document.getElementById('auth-screen').style.display = 'flex';
+            document.getElementById('dashboard-screen').style.display = 'none';
+        }
+
+        function showDashboard() {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('dashboard-screen').style.display = 'block';
+            // Trigger loading settings on dashboard launch
+            loadSettings();
+            loadServices();
+            loadPortfolio();
+            loadTeam();
+            loadTestimonials();
+            loadClients();
+            loadMediaLibrary();
+        }
+
+        // Loader toggles
+        function showLoader() { document.getElementById('loader').style.opacity = '1'; document.getElementById('loader').style.display = 'flex'; }
+        function hideLoader() { document.getElementById('loader').style.opacity = '0'; setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 300); }
+
+        // Switch Sidebar Tabs
+        function switchTab(tabId) {
+            // Update tabs panels
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+
+            // Update sidebar active menu index
+            document.querySelectorAll('.sidebar-menu li').forEach(item => item.classList.remove('active'));
+            event.currentTarget.parentElement.classList.add('active');
+
+            // Header page name title
+            const tabNames = {
+                'settings': 'Site Settings',
+                'seo': 'SEO / Metadata',
+                'hero': 'Hero Header Banner',
+                'about': 'About Info Section',
+                'services': 'Service Layout',
+                'portfolio': 'Works / Portfolio Grid',
+                'team': 'Agency Team Members',
+                'testimonials': 'Customer Reviews',
+                'clients': 'Client Partners',
+                'contact': 'Contacts & Social Links',
+                'media': 'Media Library Assets'
+            };
+            document.getElementById('page-title').innerText = tabNames[tabId] || 'Dashboard';
+        }
+
+        // Show toast banner
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').innerText = text;
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+
+        // ----------------------------------------------------
+        // CRUD: Global Settings
+        // ----------------------------------------------------
+        function loadSettings() {
+            fetch('/api/settings')
+                .then(res => res.json())
+                .then(settings => {
+                    for (const [key, value] of Object.entries(settings)) {
+                        const input = document.getElementById(`setting-${key}`);
+                        if (input) input.value = value || '';
+                    }
+                });
+        }
+
+        function saveSettings(e) {
+            e.preventDefault();
+            const formElements = e.currentTarget.querySelectorAll('[id^="setting-"]');
+            const data = {};
+            formElements.forEach(el => {
+                const key = el.id.replace('setting-', '');
+                data[key] = el.value;
+            });
+
+            showLoader();
+            fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to save settings');
+                return res.json();
+            })
+            .then(() => {
+                hideLoader();
+                showToast('Settings saved successfully!');
+            })
+            .catch(err => {
+                hideLoader();
+                alert(err.message);
+            });
+        }
+
+        // ----------------------------------------------------
+        // CRUD: Services
+        // ----------------------------------------------------
+        function loadServices() {
+            fetch('/api/services')
+                .then(res => res.json())
+                .then(services => {
+                    const container = document.getElementById('services-list');
+                    container.innerHTML = '';
+                    if (services.length === 0) {
+                        container.innerHTML = '<p style="opacity: 0.5;">No services configured.</p>';
+                        return;
+                    }
+                    services.forEach(s => {
+                        container.appendChild(createCrudRow({
+                            image: s.image,
+                            title: s.title,
+                            subtitle: s.description,
+                            onEdit: () => editService(s),
+                            onDelete: () => deleteService(s.id)
+                        }));
+                    });
+                });
+        }
+
+        function editService(s) {
+            document.getElementById('service-id').value = s.id;
+            document.getElementById('service-title').value = s.title;
+            document.getElementById('service-description').value = s.description;
+            document.getElementById('service-image').value = s.image;
+            document.getElementById('service-order').value = s.order_index;
+
+            // Load bullet points
+            const bullets = JSON.parse(s.bullets || '[]');
+            const container = document.getElementById('bullets-list-container');
+            container.innerHTML = '';
+            bullets.forEach(b => addBulletField(b));
+            if (bullets.length === 0) addBulletField('');
+
+            document.getElementById('service-modal-title').innerText = 'Edit Service';
+            openModal('service-modal');
+        }
+
+        function openServiceModal() {
+            document.getElementById('service-id').value = '';
+            document.getElementById('service-title').value = '';
+            document.getElementById('service-description').value = '';
+            document.getElementById('service-image').value = '';
+            document.getElementById('service-order').value = '0';
+            const container = document.getElementById('bullets-list-container');
+            container.innerHTML = '';
+            addBulletField('');
+            document.getElementById('service-modal-title').innerText = 'Add Service';
+            openModal('service-modal');
+        }
+
+        function addBulletField(val = '') {
+            const container = document.getElementById('bullets-list-container');
+            const row = document.createElement('div');
+            row.className = 'bullet-item';
+            row.innerHTML = `
+                <input type="text" class="bullet-input" required placeholder="e.g. UX Research" value="${val}">
+                <button type="button" class="btn btn-secondary" onclick="this.parentElement.remove()" style="padding: 10px; width: 40px; color: var(--danger-color);"><i class="fa-solid fa-trash"></i></button>
+            `;
+            container.appendChild(row);
+        }
+
+        function saveService(e) {
+            e.preventDefault();
+            const id = document.getElementById('service-id').value;
+            const title = document.getElementById('service-title').value;
+            const description = document.getElementById('service-description').value;
+            const image = document.getElementById('service-image').value;
+            const order_index = document.getElementById('service-order').value;
+
+            // Collect bullets
+            const bullets = [];
+            document.querySelectorAll('.bullet-input').forEach(input => {
+                if (input.value.trim()) bullets.push(input.value.trim());
+            });
+
+            fetch('/api/services', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, title, description, image, bullets, order_index })
+            })
+            .then(res => res.json())
+            .then(() => {
+                closeModal('service-modal');
+                loadServices();
+                showToast('Service saved!');
+            });
+        }
+
+        function deleteService(id) {
+            if (!confirm('Are you sure you want to delete this service?')) return;
+            fetch(`/api/services/${id}`, { method: 'DELETE' })
+                .then(() => {
+                    loadServices();
+                    showToast('Service deleted.');
+                });
+        }
+
+        // ----------------------------------------------------
+        // CRUD: Portfolio Items
+        // ----------------------------------------------------
+        function loadPortfolio() {
+            fetch('/api/portfolio')
+                .then(res => res.json())
+                .then(items => {
+                    const container = document.getElementById('portfolio-list');
+                    container.innerHTML = '';
+                    if (items.length === 0) {
+                        container.innerHTML = '<p style="opacity: 0.5;">No portfolio items configured.</p>';
+                        return;
+                    }
+                    items.forEach(p => {
+                        container.appendChild(createCrudRow({
+                            image: p.image,
+                            title: p.title,
+                            subtitle: p.category,
+                            onEdit: () => editPortfolio(p),
+                            onDelete: () => deletePortfolio(p.id)
+                        }));
+                    });
+                });
+        }
+
+        function openPortfolioModal() {
+            document.getElementById('portfolio-id').value = '';
+            document.getElementById('portfolio-title').value = '';
+            document.getElementById('portfolio-category').value = '';
+            document.getElementById('portfolio-image').value = '';
+            document.getElementById('portfolio-order').value = '0';
+            document.getElementById('portfolio-modal-title').innerText = 'Add Portfolio Item';
+            openModal('portfolio-modal');
+        }
+
+        function editPortfolio(p) {
+            document.getElementById('portfolio-id').value = p.id;
+            document.getElementById('portfolio-title').value = p.title;
+            document.getElementById('portfolio-category').value = p.category;
+            document.getElementById('portfolio-image').value = p.image;
+            document.getElementById('portfolio-order').value = p.order_index;
+            document.getElementById('portfolio-modal-title').innerText = 'Edit Portfolio Item';
+            openModal('portfolio-modal');
+        }
+
+        function savePortfolio(e) {
+            e.preventDefault();
+            const id = document.getElementById('portfolio-id').value;
+            const title = document.getElementById('portfolio-title').value;
+            const category = document.getElementById('portfolio-category').value;
+            const image = document.getElementById('portfolio-image').value;
+            const order_index = document.getElementById('portfolio-order').value;
+
+            fetch('/api/portfolio', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, title, category, image, order_index })
+            })
+            .then(res => res.json())
+            .then(() => {
+                closeModal('portfolio-modal');
+                loadPortfolio();
+                showToast('Portfolio item saved!');
+            });
+        }
+
+        function deletePortfolio(id) {
+            if (!confirm('Are you sure you want to delete this portfolio item?')) return;
+            fetch(`/api/portfolio/${id}`, { method: 'DELETE' })
+                .then(() => {
+                    loadPortfolio();
+                    showToast('Portfolio item deleted.');
+                });
+        }
+
+        // ----------------------------------------------------
+        // CRUD: Team Members
+        // ----------------------------------------------------
+        function loadTeam() {
+            fetch('/api/team')
+                .then(res => res.json())
+                .then(team => {
+                    const container = document.getElementById('team-list');
+                    container.innerHTML = '';
+                    if (team.length === 0) {
+                        container.innerHTML = '<p style="opacity: 0.5;">No team members configured.</p>';
+                        return;
+                    }
+                    team.forEach(t => {
+                        container.appendChild(createCrudRow({
+                            image: t.image,
+                            title: t.name,
+                            subtitle: t.designation,
+                            onEdit: () => editTeam(t),
+                            onDelete: () => deleteTeam(t.id)
+                        }));
+                    });
+                });
+        }
+
+        function openTeamModal() {
+            document.getElementById('team-id').value = '';
+            document.getElementById('team-name').value = '';
+            document.getElementById('team-designation').value = '';
+            document.getElementById('team-image').value = '';
+            document.getElementById('team-order').value = '0';
+            document.getElementById('team-social-twitter').value = '';
+            document.getElementById('team-social-instagram').value = '';
+            document.getElementById('team-social-dribbble').value = '';
+            document.getElementById('team-social-behance').value = '';
+            document.getElementById('team-modal-title').innerText = 'Add Team Member';
+            openModal('team-modal');
+        }
+
+        function editTeam(t) {
+            document.getElementById('team-id').value = t.id;
+            document.getElementById('team-name').value = t.name;
+            document.getElementById('team-designation').value = t.designation;
+            document.getElementById('team-image').value = t.image;
+            document.getElementById('team-order').value = t.order_index;
+
+            const socials = JSON.parse(t.socials || '{}');
+            document.getElementById('team-social-twitter').value = socials.twitter || '';
+            document.getElementById('team-social-instagram').value = socials.instagram || '';
+            document.getElementById('team-social-dribbble').value = socials.dribbble || '';
+            document.getElementById('team-social-behance').value = socials.behance || '';
+
+            document.getElementById('team-modal-title').innerText = 'Edit Team Member';
+            openModal('team-modal');
+        }
+
+        function saveTeam(e) {
+            e.preventDefault();
+            const id = document.getElementById('team-id').value;
+            const name = document.getElementById('team-name').value;
+            const designation = document.getElementById('team-designation').value;
+            const image = document.getElementById('team-image').value;
+            const order_index = document.getElementById('team-order').value;
+
+            const socials = {
+                twitter: document.getElementById('team-social-twitter').value,
+                instagram: document.getElementById('team-social-instagram').value,
+                dribbble: document.getElementById('team-social-dribbble').value,
+                behance: document.getElementById('team-social-behance').value
+            };
+
+            fetch('/api/team', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, name, designation, image, socials, order_index })
+            })
+            .then(res => res.json())
+            .then(() => {
+                closeModal('team-modal');
+                loadTeam();
+                showToast('Team member saved!');
+            });
+        }
+
+        function deleteTeam(id) {
+            if (!confirm('Are you sure you want to delete this team member?')) return;
+            fetch(`/api/team/${id}`, { method: 'DELETE' })
+                .then(() => {
+                    loadTeam();
+                    showToast('Team member deleted.');
+                });
+        }
+
+        // ----------------------------------------------------
+        // CRUD: Testimonials
+        // ----------------------------------------------------
+        function loadTestimonials() {
+            fetch('/api/testimonials')
+                .then(res => res.json())
+                .then(reviews => {
+                    const container = document.getElementById('testimonials-list');
+                    container.innerHTML = '';
+                    if (reviews.length === 0) {
+                        container.innerHTML = '<p style="opacity: 0.5;">No testimonials configured.</p>';
+                        return;
+                    }
+                    reviews.forEach(t => {
+                        container.appendChild(createCrudRow({
+                            image: t.author_avatar,
+                            title: t.author_name,
+                            subtitle: t.text,
+                            onEdit: () => editTestimonial(t),
+                            onDelete: () => deleteTestimonial(t.id)
+                        }));
+                    });
+                });
+        }
+
+        function openTestimonialModal() {
+            document.getElementById('testimonial-id').value = '';
+            document.getElementById('testimonial-text').value = '';
+            document.getElementById('testimonial-author-name').value = '';
+            document.getElementById('testimonial-author-role').value = '';
+            document.getElementById('testimonial-avatar').value = '';
+            document.getElementById('testimonial-order').value = '0';
+            document.getElementById('testimonial-modal-title').innerText = 'Add Testimonial';
+            openModal('testimonial-modal');
+        }
+
+        function editTestimonial(t) {
+            document.getElementById('testimonial-id').value = t.id;
+            document.getElementById('testimonial-text').value = t.text;
+            document.getElementById('testimonial-author-name').value = t.author_name;
+            document.getElementById('testimonial-author-role').value = t.author_role;
+            document.getElementById('testimonial-avatar').value = t.author_avatar;
+            document.getElementById('testimonial-order').value = t.order_index;
+            document.getElementById('testimonial-modal-title').innerText = 'Edit Testimonial';
+            openModal('testimonial-modal');
+        }
+
+        function saveTestimonial(e) {
+            e.preventDefault();
+            const id = document.getElementById('testimonial-id').value;
+            const text = document.getElementById('testimonial-text').value;
+            const author_name = document.getElementById('testimonial-author-name').value;
+            const author_role = document.getElementById('testimonial-author-role').value;
+            const author_avatar = document.getElementById('testimonial-avatar').value;
+            const order_index = document.getElementById('testimonial-order').value;
+
+            fetch('/api/testimonials', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, text, author_name, author_role, author_avatar, order_index })
+            })
+            .then(res => res.json())
+            .then(() => {
+                closeModal('testimonial-modal');
+                loadTestimonials();
+                showToast('Testimonial saved!');
+            });
+        }
+
+        function deleteTestimonial(id) {
+            if (!confirm('Are you sure you want to delete this testimonial?')) return;
+            fetch(`/api/testimonials/${id}`, { method: 'DELETE' })
+                .then(() => {
+                    loadTestimonials();
+                    showToast('Testimonial deleted.');
+                });
+        }
+
+        // ----------------------------------------------------
+        // CRUD: Clients
+        // ----------------------------------------------------
+        function loadClients() {
+            fetch('/api/clients')
+                .then(res => res.json())
+                .then(clients => {
+                    const container = document.getElementById('clients-list');
+                    container.innerHTML = '';
+                    if (clients.length === 0) {
+                        container.innerHTML = '<p style="opacity: 0.5;">No client logos configured.</p>';
+                        return;
+                    }
+                    clients.forEach(c => {
+                        container.appendChild(createCrudRow({
+                            image: c.image,
+                            title: c.name || 'Client',
+                            subtitle: c.image,
+                            onEdit: () => editClient(c),
+                            onDelete: () => deleteClient(c.id)
+                        }));
+                    });
+                });
+        }
+
+        function openClientModal() {
+            document.getElementById('client-id').value = '';
+            document.getElementById('client-name').value = '';
+            document.getElementById('client-image').value = '';
+            document.getElementById('client-order').value = '0';
+            document.getElementById('client-modal-title').innerText = 'Add Client Logo';
+            openModal('client-modal');
+        }
+
+        function editClient(c) {
+            document.getElementById('client-id').value = c.id;
+            document.getElementById('client-name').value = c.name || '';
+            document.getElementById('client-image').value = c.image;
+            document.getElementById('client-order').value = c.order_index;
+            document.getElementById('client-modal-title').innerText = 'Edit Client Logo';
+            openModal('client-modal');
+        }
+
+        function saveClient(e) {
+            e.preventDefault();
+            const id = document.getElementById('client-id').value;
+            const name = document.getElementById('client-name').value;
+            const image = document.getElementById('client-image').value;
+            const order_index = document.getElementById('client-order').value;
+
+            fetch('/api/clients', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, name, image, order_index })
+            })
+            .then(res => res.json())
+            .then(() => {
+                closeModal('client-modal');
+                loadClients();
+                showToast('Client partner logo saved!');
+            });
+        }
+
+        function deleteClient(id) {
+            if (!confirm('Are you sure you want to delete this partner logo?')) return;
+            fetch(`/api/clients/${id}`, { method: 'DELETE' })
+                .then(() => {
+                    loadClients();
+                    showToast('Client deleted.');
+                });
+        }
+
+        // ----------------------------------------------------
+        // Media Library & Upload functions
+        // ----------------------------------------------------
+        function loadMediaLibrary() {
+            fetch('/api/media')
+                .then(res => res.json())
+                .then(media => {
+                    cachedMediaList = media;
+                    renderMediaGrid(media, 'media-grid-view', true);
+                });
+        }
+
+        function renderMediaGrid(media, gridId, allowDelete) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = '';
+            if (media.length === 0) {
+                grid.innerHTML = '<p style="opacity: 0.5; grid-column: span 10; text-align: center; padding: 20px;">No media assets found.</p>';
+                return;
+            }
+            media.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'media-card';
+                
+                const isSvg = item.name.endsWith('.svg');
+                if (isSvg) {
+                    card.innerHTML = `
+                        <div class="svg-preview"><i class="fa-solid fa-file-code"></i></div>
+                        <p style="position: absolute; bottom: 8px; font-size: 10px; opacity: 0.7; overflow: hidden; width: 90%; text-overflow: ellipsis; white-space: nowrap; text-align: center;">${item.name}</p>
+                    `;
+                } else {
+                    card.innerHTML = `<img src="/${item.url}" alt="${item.name}">`;
+                }
+
+                // Append actions hover
+                const actions = document.createElement('div');
+                actions.className = 'media-actions';
+                
+                // Copy URL action button
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'media-action-btn';
+                copyBtn.title = 'Copy Path';
+                copyBtn.innerHTML = '<i class="fa-solid fa-link"></i>';
+                copyBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(item.url);
+                    showToast('File path copied to clipboard!');
+                };
+                actions.appendChild(copyBtn);
+
+                if (allowDelete) {
+                    // Delete button
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'media-action-btn delete-btn';
+                    delBtn.title = 'Delete file';
+                    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                    delBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        deleteMediaFile(item.name);
+                    };
+                    actions.appendChild(delBtn);
+                }
+
+                card.appendChild(actions);
+
+                // Clicking select image if modal active
+                card.onclick = () => {
+                    if (currentActiveSelectorTarget) {
+                        document.getElementById(currentActiveSelectorTarget).value = item.url;
+                        closeModal('media-selector-modal');
+                        currentActiveSelectorTarget = null;
+                        showToast('Asset selected!');
+                    }
+                };
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Drag Drop uploads setup
+        function setupMediaDragDrop() {
+            const dropzone = document.getElementById('media-dropzone');
+            const fileInput = document.getElementById('media-file-input');
+
+            dropzone.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', () => handleUpload(fileInput.files[0]));
+
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = 'var(--accent-color)';
+            });
+
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.style.borderColor = 'var(--border-color)';
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = 'var(--border-color)';
+                if (e.dataTransfer.files.length > 0) {
+                    handleUpload(e.dataTransfer.files[0]);
+                }
+            });
+        }
+
+        function handleUpload(file) {
+            if (!file) return;
+            showLoader();
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/api/media/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => {
+                if (!res.ok) return res.json().then(e => { throw new Error(e.error) });
+                return res.json();
+            })
+            .then(data => {
+                hideLoader();
+                showToast('File uploaded successfully!');
+                loadMediaLibrary();
+            })
+            .catch(err => {
+                hideLoader();
+                alert(err.message || 'Failed to upload file.');
+            });
+        }
+
+        function deleteMediaFile(filename) {
+            if (!confirm(`Are you sure you want to delete "${filename}"?`)) return;
+            showLoader();
+            fetch('/api/media/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename })
+            })
+            .then(res => res.json())
+            .then(() => {
+                hideLoader();
+                showToast('File deleted successfully.');
+                loadMediaLibrary();
+            });
+        }
+
+        function filterMedia() {
+            const query = document.getElementById('media-search').value.toLowerCase();
+            const filtered = cachedMediaList.filter(item => item.name.toLowerCase().includes(query));
+            renderMediaGrid(filtered, 'media-grid-view', true);
+        }
+
+        // ----------------------------------------------------
+        // Media Selector Modal Dialog Logic
+        // ----------------------------------------------------
+        function openMediaSelector(targetInputId) {
+            currentActiveSelectorTarget = targetInputId;
+            document.getElementById('modal-media-search').value = '';
+            renderMediaGrid(cachedMediaList, 'modal-media-grid', false);
+            openModal('media-selector-modal');
+        }
+
+        function filterModalMedia() {
+            const query = document.getElementById('modal-media-search').value.toLowerCase();
+            const filtered = cachedMediaList.filter(item => item.name.toLowerCase().includes(query));
+            renderMediaGrid(filtered, 'modal-media-grid', false);
+        }
+
+        // ----------------------------------------------------
+        // HTML Templates Helper utilities
+        // ----------------------------------------------------
+        function createCrudRow({ image, title, subtitle, onEdit, onDelete }) {
+            const row = document.createElement('div');
+            row.className = 'crud-list-item';
+
+            const isSvg = image && image.endsWith('.svg');
+            let previewHtml = '';
+            if (isSvg) {
+                previewHtml = `<div style="width:50px; height:50px; border-radius:6px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.2); font-size:24px;"><i class="fa-solid fa-file-code"></i></div>`;
+            } else if (image) {
+                previewHtml = `<img src="/${image}" alt="${title}">`;
+            } else {
+                previewHtml = `<div style="width:50px; height:50px; border-radius:6px; background:rgba(0,0,0,0.3);"></div>`;
+            }
+
+            row.innerHTML = `
+                ${previewHtml}
+                <div class="crud-item-details">
+                    <h4>${title}</h4>
+                    <p>${subtitle}</p>
+                </div>
+            `;
+
+            const actions = document.createElement('div');
+            actions.className = 'crud-item-actions';
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn btn-secondary';
+            editBtn.style.padding = '8px 12px';
+            editBtn.innerHTML = '<i class="fa-solid fa-edit"></i> Edit';
+            editBtn.onclick = onEdit;
+            actions.appendChild(editBtn);
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn btn-danger';
+            delBtn.style.padding = '8px 12px';
+            delBtn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete';
+            delBtn.onclick = onDelete;
+            actions.appendChild(delBtn);
+
+            row.appendChild(actions);
+            return row;
+        }
+
+        // Modal Helpers
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    </script>
+</body>
+</html>
