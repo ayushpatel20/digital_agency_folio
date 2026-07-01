@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
 import { Mail, CheckCircle, Trash2, Eye, RefreshCw } from "lucide-react";
 
@@ -18,15 +17,9 @@ interface Message {
 const SAMPLE_MESSAGES: Message[] = [];
 
 export default function MessagesAdminPage() {
-  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(SAMPLE_MESSAGES);
   const [selected, setSelected] = useState<Message | null>(null);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const auth = sessionStorage.getItem("admin_authenticated");
-    if (!auth) router.push("/admin/login");
-  }, [router]);
 
   const fetchMessages = async () => {
     setLoading(true);

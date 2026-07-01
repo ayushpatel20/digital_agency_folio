@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import { Save, CheckCircle } from "lucide-react";
 
 export default function HeroAdminPage() {
-  const router = useRouter();
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({
     heading: "We Build the\nFuture of Digital",
@@ -25,11 +23,6 @@ export default function HeroAdminPage() {
     badge2Text: "🏆 Award Winning",
     badge3Text: "⭐ Top Rated",
   });
-
-  useEffect(() => {
-    const auth = sessionStorage.getItem("admin_authenticated");
-    if (!auth) router.push("/admin/login");
-  }, [router]);
 
   const update = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 

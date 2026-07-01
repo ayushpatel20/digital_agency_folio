@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import { Save, CheckCircle, Palette, Type, Globe, ToggleLeft, ToggleRight } from "lucide-react";
 
 export default function SiteSettingsAdminPage() {
-  const router = useRouter();
   const [saved, setSaved] = useState(false);
   const [settings, setSettings] = useState({
     siteName: "Startup of the Future",
@@ -21,11 +19,6 @@ export default function SiteSettingsAdminPage() {
     loaderEnabled: true,
     copyright: "© 2025 Startup of the Future. All Rights Reserved.",
   });
-
-  useEffect(() => {
-    const auth = sessionStorage.getItem("admin_authenticated");
-    if (!auth) router.push("/admin/login");
-  }, [router]);
 
   const update = (field: string, value: any) => setSettings((s) => ({ ...s, [field]: value }));
 

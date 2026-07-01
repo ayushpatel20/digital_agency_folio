@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import { Save, CheckCircle, Mail, Phone, MapPin } from "lucide-react";
 import {
@@ -12,7 +11,6 @@ import {
 } from "@/components/ui/BrandIcons";
 
 export default function ContactAdminPage() {
-  const router = useRouter();
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({
     email: "hello@startupofthefuture.com",
@@ -24,11 +22,6 @@ export default function ContactAdminPage() {
     instagramUrl: "https://instagram.com",
     youtubeUrl: "",
   });
-
-  useEffect(() => {
-    const auth = sessionStorage.getItem("admin_authenticated");
-    if (!auth) router.push("/admin/login");
-  }, [router]);
 
   const handleSave = () => {
     setSaved(true);

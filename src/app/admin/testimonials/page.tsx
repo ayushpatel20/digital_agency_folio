@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import { Plus, Trash2, Save, CheckCircle, GripVertical, Star } from "lucide-react";
 
@@ -23,15 +22,9 @@ const DEFAULT_TESTIMONIALS: Testimonial[] = [
 ];
 
 export default function TestimonialsAdminPage() {
-  const router = useRouter();
   const [testimonials, setTestimonials] = useState<Testimonial[]>(DEFAULT_TESTIMONIALS);
   const [editing, setEditing] = useState<Testimonial | null>(null);
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    const auth = sessionStorage.getItem("admin_authenticated");
-    if (!auth) router.push("/admin/login");
-  }, [router]);
 
   const handleSave = () => {
     setSaved(true);

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import { Save, RefreshCw, Plus, Trash2, GripVertical, Edit2, CheckCircle, Eye, EyeOff } from "lucide-react";
 
@@ -25,15 +24,9 @@ const DEFAULT_SERVICES: Service[] = [
 ];
 
 export default function ServicesAdminPage() {
-  const router = useRouter();
   const [services, setServices] = useState<Service[]>(DEFAULT_SERVICES);
   const [editing, setEditing] = useState<Service | null>(null);
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    const auth = sessionStorage.getItem("admin_authenticated");
-    if (!auth) router.push("/admin/login");
-  }, [router]);
 
   const handleSave = () => {
     setSaved(true);

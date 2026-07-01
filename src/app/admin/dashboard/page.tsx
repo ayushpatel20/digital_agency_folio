@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import {
   Briefcase,
@@ -59,14 +58,11 @@ const QUICK_ACTIONS = [
 ];
 
 export default function AdminDashboard() {
-  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const auth = sessionStorage.getItem("admin_authenticated");
-    if (!auth) {
-      router.push("/admin/login");
-    }
-  }, [router]);
+    setMounted(true);
+  }, []);
 
   return (
     <AdminShell title="Dashboard">
@@ -180,10 +176,12 @@ export default function AdminDashboard() {
               <span className="text-white/60 text-xs font-medium">Last Updated</span>
             </div>
             <p className="text-white/40 text-xs">
-              {new Date().toLocaleString("en-US", {
-                dateStyle: "medium",
-                timeStyle: "short",
-              })}
+              {mounted
+                ? new Date().toLocaleString("en-US", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })
+                : "Loading..."}
             </p>
           </div>
         </div>

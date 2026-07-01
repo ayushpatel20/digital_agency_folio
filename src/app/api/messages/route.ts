@@ -4,6 +4,15 @@ import { prisma } from "@/lib/db";
 export async function GET() {
   try {
     const messages = await prisma.contactSubmission.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        subject: true,
+        message: true,
+        read: true,
+        createdAt: true,
+      },
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(messages);

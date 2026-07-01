@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, memo } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -73,16 +73,14 @@ interface AdminShellProps {
   title?: string;
 }
 
-export default function AdminShell({ children, title = "Dashboard" }: AdminShellProps) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+interface SidebarProps {
+  pathname: string;
+  setSidebarOpen: (open: boolean) => void;
+  handleSignOut: () => void;
+}
 
-  const handleSignOut = async () => {
-    router.push("/admin/login");
-  };
-
-  const Sidebar = () => (
+const Sidebar = memo(function Sidebar({ pathname, setSidebarOpen, handleSignOut }: SidebarProps) {
+  return (
     <aside className="flex flex-col h-full">
       {/* Logo */}
       <div className="flex items-center gap-3 p-6 border-b border-white/5">
@@ -150,12 +148,42 @@ export default function AdminShell({ children, title = "Dashboard" }: AdminShell
       </div>
     </aside>
   );
+});
+
+export default function AdminShell({ children, title = "Dashboard" }: AdminShellProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const auth = sessionStorage.getItem("admin_authenticated");
+    if (!auth) {
+      router.push("/admin/login");
+    } else {
+      setIsAuthenticated(true);
+    }
+  }, [router]);
+
+  const handleSignOut = () => {
+    sessionStorage.removeItem("admin_authenticated");
+    sessionStorage.removeItem("admin_email");
+    router.push("/admin/login");
+  };
+
+  if (isAuthenticated === null) {
+    return (
+      <div className="flex h-screen bg-[#020408] items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#020408]">
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex flex-col w-64 flex-shrink-0 glass border-r border-white/5">
-        <Sidebar />
+        <Sidebar pathname={pathname} setSidebarOpen={setSidebarOpen} handleSignOut={handleSignOut} />
       </div>
 
       {/* Mobile Sidebar Overlay */}
@@ -166,7 +194,7 @@ export default function AdminShell({ children, title = "Dashboard" }: AdminShell
             onClick={() => setSidebarOpen(false)}
           />
           <div className="relative w-72 glass-strong border-r border-white/8 flex flex-col">
-            <Sidebar />
+            <Sidebar pathname={pathname} setSidebarOpen={setSidebarOpen} handleSignOut={handleSignOut} />
           </div>
         </div>
       )}

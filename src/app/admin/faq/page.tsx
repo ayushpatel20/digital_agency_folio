@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import { Save, CheckCircle, Plus, Trash2, GripVertical } from "lucide-react";
 
@@ -23,15 +22,9 @@ const DEFAULT_FAQS: Faq[] = [
 ];
 
 export default function FaqAdminPage() {
-  const router = useRouter();
   const [faqs, setFaqs] = useState<Faq[]>(DEFAULT_FAQS);
   const [editing, setEditing] = useState<Faq | null>(null);
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    const auth = sessionStorage.getItem("admin_authenticated");
-    if (!auth) router.push("/admin/login");
-  }, [router]);
 
   const handleSave = () => { setSaved(true); setTimeout(() => setSaved(false), 3000); };
 

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import { Plus, Trash2, Edit2, Eye, EyeOff, CheckCircle, Save, Star } from "lucide-react";
 
@@ -26,16 +25,10 @@ const DEFAULT_PROJECTS: Project[] = [
 const CATEGORIES = ["AI/ML", "E-Commerce", "Mobile App", "FinTech", "Web Dev", "SaaS"];
 
 export default function PortfolioAdminPage() {
-  const router = useRouter();
   const [projects, setProjects] = useState<Project[]>(DEFAULT_PROJECTS);
   const [editing, setEditing] = useState<Project | null>(null);
   const [saved, setSaved] = useState(false);
   const [filter, setFilter] = useState<"ALL" | "DRAFT" | "PUBLISHED">("ALL");
-
-  useEffect(() => {
-    const auth = sessionStorage.getItem("admin_authenticated");
-    if (!auth) router.push("/admin/login");
-  }, [router]);
 
   const handleSave = () => {
     setSaved(true);

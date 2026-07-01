@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import { Plus, Trash2, Save, CheckCircle } from "lucide-react";
 
@@ -25,16 +24,10 @@ const DEFAULT_POSTS: BlogPost[] = [
 const CATEGORIES = ["AI/ML", "Engineering", "Design", "Growth", "Business", "Technology"];
 
 export default function BlogAdminPage() {
-  const router = useRouter();
   const [posts, setPosts] = useState<BlogPost[]>(DEFAULT_POSTS);
   const [editing, setEditing] = useState<BlogPost | null>(null);
   const [saved, setSaved] = useState(false);
   const [filter, setFilter] = useState<"ALL" | "DRAFT" | "PUBLISHED">("ALL");
-
-  useEffect(() => {
-    const auth = sessionStorage.getItem("admin_authenticated");
-    if (!auth) router.push("/admin/login");
-  }, [router]);
 
   const handleSave = () => {
     setSaved(true);

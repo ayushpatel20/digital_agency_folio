@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import { Save, CheckCircle } from "lucide-react";
 
 export default function AboutAdminPage() {
-  const router = useRouter();
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({
     heading: "We Provide Brilliant Ideas to Grow Your Startup",
@@ -20,11 +18,6 @@ export default function AboutAdminPage() {
     fundingDesc: "We helped clients secure over $15M in funding through our growth strategies and product development.",
     skills: "React & Next.js, Node.js & Python, AI/ML & LLMs, Mobile (RN & Flutter), Cloud & DevOps, UI/UX Design",
   });
-
-  useEffect(() => {
-    const auth = sessionStorage.getItem("admin_authenticated");
-    if (!auth) router.push("/admin/login");
-  }, [router]);
 
   const update = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
